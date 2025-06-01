@@ -1,0 +1,83 @@
+data1 = read.csv(file.choose())
+View(data1)
+
+dim(data1)
+
+### Multiple Linear Regression 
+
+# Best subset selection
+library(leaps)
+regfit.full <- regsubsets(pop ~ ., data = data1, nvmax = ncol(data1)-1)
+reg.summary = summary(regfit.full)
+reg.summary
+
+### Optimal model selection 
+plot(reg.summary$bic , xlab = "Number of Variables",
+     ylab = "BIC", type = "l", cex.lab = 1.3, lwd = 3, col = "green")
+axis(1, font = 2); axis(2, font = 2)
+
+pos.min = which.min(reg.summary$bic)
+pos.min
+points (pos.min, reg.summary$bic[pos.min], col = "red", cex = 2,
+        pch = 20)
+
+variance = vcov(regfit.full, id = pos.min)
+diag(variance)
+
+linear.regression = lm(pop~., data = data1)
+vcov(linear.regression)
+diag(vcov(linear.regression))
+
+### Graphical visualization of the best subset selection
+plot(regfit.full , scale = "bic")
+
+# Minimum BIC for a three variable model
+coef(regfit.full, pos.min)
+#coef(regfit.full, 11)
+
+# Forward selection
+regfit.fwd <- regsubsets(pop ~ ., data = data1,
+                         method = "forward", nvmax = ncol(data1)-1)
+reg.fwd.summary = summary(regfit.fwd)
+
+reg.fwd.summary
+
+plot(reg.fwd.summary$bic , xlab = "Number of Variables",
+     ylab = "BIC", type = "l", lwd = 3, 
+     col = "green", cex.lab = 1.5)
+axis(1, font = 2); axis(2, font = 2)
+pos.fwd.min = which.min(reg.fwd.summary$bic)
+points (pos.fwd.min, reg.fwd.summary$bic [pos.fwd.min], col = "red", cex = 2,
+        pch = 20)
+
+plot(regfit.fwd , scale = "bic")
+
+coefficient = coef(regfit.fwd, id = pos.min)
+coefficient
+
+names(coefficient)
+### Backward Regression Model 
+regfit.bwd <- regsubsets(pop ~ ., data = data1,
+                         nvmax = ncol(data1)-1, method = "backward")
+reg.bwd.summary = summary(regfit.bwd)
+
+plot(reg.bwd.summary$bic , xlab = "Number of Variables",
+     ylab = "BIC", type = "l", cex.lab = 1.5, col = "green", lwd = 3)
+axis(1, font = 2); axis(2, font = 2)
+pos.min.bwd = which.min(reg.bwd.summary$bic)
+pos.min.bwd
+points (pos.min.bwd, reg.bwd.summary$bic[pos.min.bwd], col = "red", cex = 2,
+        pch = 20)
+
+plot(regfit.bwd , scale = "bic")
+
+### Comparison between three selection methods ##
+
+coef(regfit.full, pos.min)
+coef(regfit.fwd , pos.fwd.min)
+coef(regfit.bwd , pos.min.bwd)
+
+
+
+
+
